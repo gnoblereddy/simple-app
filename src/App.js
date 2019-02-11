@@ -1,78 +1,133 @@
-import React from "react";
+import React from 'react';
+import findIndex from 'lodash/findIndex';
 
-import "./index.css";
-
-export default class IncorporationForm extends React.Component {
-  constructor() {
-    super();
+class AddDynamicRowsTable extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {
-      shareholders: [{ name: "" }]
+      rows: [{ id: '', workItem: '', dueDate: '', resourceNeeded: '', editFlag: false, }],
     };
   }
 
-  componentWillMount() {
-    this.setState({ shareholders: [{ name: "Test" }] });
-
-  }
-
-  handleShareholderNameChange = idx => evt => {
-    const newShareholders = this.state.shareholders.map((shareholder, sidx) => {
-      if (idx !== sidx) return shareholder;
-      return { ...shareholder, name: evt.target.value };
-    });
-
-    this.setState({ shareholders: newShareholders });
-  };
-
-  handleSubmit = evt => {
-    const { name, shareholders } = this.state;
-    alert(`Incorporated: ${name} with ${shareholders.length} shareholders`);
-  };
-
-  handleAddShareholder = () => {
+  handleChange = idx => e => {
+    const rows = [...this.state.rows];
+    rows[idx][e.target.id] = e.target.value;
     this.setState({
-      shareholders: this.state.shareholders.concat([{ name: "" }])
+      rows
     });
+    console.log('this.state-------', this.state.rows)
   };
 
-  handleRemoveShareholder = idx => () => {
+  handleAddRow = () => {
+    const item = {
+      adjustment: '',
+      id: '',
+      workItem: '',
+      dueDate: '',
+      resourceNeeded: ''
+    };
     this.setState({
-      shareholders: this.state.shareholders.filter((s, sidx) => idx !== sidx)
+      rows: [...this.state.rows, item]
     });
+  };
+  handleSave = () => {
+    console.log('handleSave--------', this.state);
+    let rowsData = this.state.rows;
+
+    rowsData.map((item) => {
+      item.editFlag = true;
+
+
+    })
+    this.setState({ rows: rowsData })
+  };
+  handleRemoveSpecificRow = idx => () => {
+    const rows = [...this.state.rows];
+    rows.splice(idx, 1);
+    this.setState({ rows });
+  };
+  handleEditSpecificRow = idx => () => {
+    console.log('handleEditSpecificRow--------', this.state.rows);
+    let rowsData = this.state.rows;
+    rowsData[idx].editFlag = false;
+    this.setState({ rows: rowsData });
+    console.log('handleEditSpecificRow-----after---', this.state.rows);
   };
 
   render() {
-    console.log('render--------', this.state)
     return (
-      <form onSubmit={this.handleSubmit}>
-
-        <h4>Shareholders</h4>
-
-        {this.state.shareholders.map((shareholder, idx) => (
-          <div className="shareholder">
-            <input
-              type="text"
-              placeholder={`Shareholder #${idx + 1} name`}
-              value={shareholder.name}
-              onChange={this.handleShareholderNameChange(idx)}
-            />
-            <button
-              type="button"
-              onClick={this.handleRemoveShareholder(idx)}
-              className="small"
-            >
-              -
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={this.handleAddShareholder}
-          className="small"
+      <div className="main-div">
+        <h3>{'Project Title'}</h3>
+        <h6>{`Number of Work item :${this.state.rows.length}`}</h6>
+        <table
+          className='table table-bordered table-hover'
+          id='tab_logic'
         >
-          Add Shareholder
+          <thead>
+            <tr>
+              <th className='text-center'> {'ID'} </th>
+              <th className='text-center'> {'WorkItem '} </th>
+              <th className='text-center'> {'Due Date '} </th>
+              <th className='text-center'> {'No. Resources Needed'} </th>
+              <th className='text-center'> {'Actions '} </th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.rows.map((item, idx) => (
+              <tr id='addr0' key={idx}>
+                <td>
+                  {!this.state.rows[idx].editFlag ? <input
+                    type='text'
+                    value={this.state.rows[idx].id}
+                    onChange={this.handleChange(idx)}
+                    className='form-control'
+                    id={'id'}
+                  /> : this.state.rows[idx].id}
+                </td>
+                <td>
+                  {!this.state.rows[idx].editFlag ? <input
+                    type='text'
+                    value={this.state.rows[idx].workItem}
+                    onChange={this.handleChange(idx)}
+                    className='form-control'
+                    id={'workItem'}
+                  /> : this.state.rows[idx].workItem}
+                </td>
+                <td>
+                  {!this.state.rows[idx].editFlag ? <input
+                    type='text'
+                    value={this.state.rows[idx].dueDate}
+                    onChange={this.handleChange(idx)}
+                    className='form-control'
+                    id={'dueDate'}
+                  /> : this.state.rows[idx].dueDate}
+                </td>
+                <td>
+                  {!this.state.rows[idx].editFlag ? <input
+                    type='text'
+                    value={this.state.rows[idx].resourceNeeded}
+                    onChange={this.handleChange(idx)}
+                    className='form-control'
+                    id={'resourceNeeded'}
+                  /> : this.state.rows[idx].resourceNeeded}
+                </td>
+                <td>
+                  <i className="fa fa-edit" onClick={this.handleEditSpecificRow(idx)}></i>
+                  <i className="fa fa-trash" aria-hidden="true" onClick={this.handleRemoveSpecificRow(idx)}></i>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button onClick={this.handleAddRow} className='add-row-button'>
+          {'Add New Item'}
         </button>
-      </form>
+        <button onClick={this.handleSave} className='add-row-button'>
+          {'Save'}
+        </button>
+      </div>
     );
   }
 }
+
+export default AddDynamicRowsTable;
